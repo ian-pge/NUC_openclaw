@@ -1,13 +1,10 @@
-1. Boot the NixOS USB on the NUC.
+# OpenClaw NixOS Setup
 
-2. Run these commands exactly as written:
+Boot the NixOS USB on the NUC, then run the following commands:
 
-nix-shell -p git
+    nix-shell -p git
+    git clone https://github.com/ian-pge/NUC_openclaw.git
+    cd NUC_openclaw
+    sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko disko.nix && sudo nixos-install --flake .#nuc
 
-git clone https://github.com/ian-pge/NUC_openclaw.git
-
-cd NUC_openclaw
-
-sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko disko.nix && sudo nixos-install --flake .#nuc
-
-3. When it finishes, type a root password, then type `reboot`.
+When prompted at the end, set your root password and reboot.
