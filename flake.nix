@@ -38,7 +38,15 @@
           lib,
           ...
         }: {
-          programs.nix-ld.enable = true;
+          programs.nix-ld = {
+            enable = true;
+            libraries = with pkgs; [
+              stdenv.cc.cc
+              zlib
+              openssl
+              libcap
+            ];
+          };
 
           nixpkgs.overlays = [nix-openclaw.overlays.default];
 
