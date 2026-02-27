@@ -59,7 +59,7 @@
     # ];
   };
 
-  # Extra packages available in claw's shell
+  # Extra packages available in clawe's shell
   home.packages = with pkgs; [
     ripgrep
   ];

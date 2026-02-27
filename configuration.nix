@@ -16,6 +16,20 @@
   nixpkgs.overlays = [nix-openclaw.overlays.default];
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
+  # --- Automatic Updates ---
+  system.autoUpgrade = {
+    enable = true;
+    flake = "github:ian-pge/NUC_openclaw#nuc";
+    allowReboot = false;
+  };
+
+  # --- Garbage Collection ---
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
+  };
+
   # --- nix-ld ---
   programs.nix-ld = {
     enable = true;
