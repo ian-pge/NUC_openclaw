@@ -27,6 +27,8 @@
     documents = ../documents;
 
     config = {
+      gateway.mode = "local";
+
       # -- Telegram --
       # After first deploy, authenticate with: openclaw channels login
       channels.telegram = {
