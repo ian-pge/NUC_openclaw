@@ -50,10 +50,10 @@
       };
     };
 
-    # -- Built-in plugins --
-    firstParty = {
-      summarize.enable = true; # Summarize URLs, PDFs, videos
-      oracle.enable = true; # Web search
+    bundledPlugins = {
+      summarize.enable = true; # optional but useful
+      peekaboo.enable = true; # optional (screenshots)
+      # add more later if you want
     };
 
     # -- Community plugins --
