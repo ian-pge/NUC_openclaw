@@ -17,6 +17,17 @@
 
   programs.home-manager.enable = true;
 
+  # Force OpenClaw to start on headless boot instead of waiting for a GUI
+  systemd.user.services.openclaw-gateway = {
+    Unit = {
+      After = ["network-online.target"];
+      Description = "OpenClaw Gateway Service";
+    };
+    Install = {
+      WantedBy = ["default.target"];
+    };
+  };
+
   # ---------------------------------------------------------------------------
   # OpenClaw
   # ---------------------------------------------------------------------------
