@@ -21,7 +21,6 @@
   systemd.user.services.openclaw-gateway = {
     Unit = {
       After = ["network-online.target"];
-      Description = "OpenClaw Gateway Service";
     };
     Install = {
       WantedBy = ["default.target"];
