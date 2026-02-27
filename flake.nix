@@ -81,6 +81,7 @@
             pnpm # Required by OpenClaw
             jq # Used by OpenClaw skills
             ffmpeg # Media processing for OpenClaw
+            nodejs_24
           ];
 
           # --- Home Manager ---
