@@ -22,6 +22,9 @@
     Unit = {
       After = ["network-online.target"];
     };
+    Service = {
+      EnvironmentFile = ["/var/lib/secrets/openclaw/env"];
+    };
     Install = {
       WantedBy = ["default.target"];
     };
