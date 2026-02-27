@@ -1,4 +1,4 @@
-# Home Manager config for user "claw" — OpenClaw with Telegram + Codex
+# Home Manager config for user "clawe" — OpenClaw with Telegram + Codex
 {
   config,
   pkgs,
@@ -9,8 +9,8 @@
     nix-openclaw.homeManagerModules.openclaw
   ];
 
-  home.username = "claw";
-  home.homeDirectory = "/home/claw";
+  home.username = "clawe";
+  home.homeDirectory = "/home/clawe";
   home.stateVersion = "24.11";
 
   programs.home-manager.enable = true;

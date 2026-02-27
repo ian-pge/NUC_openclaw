@@ -1,9 +1,9 @@
 {...}: {
-  users.users.claw = {
+  users.users.clawe = {
     isNormalUser = true;
     description = "OpenClaw Admin";
     extraGroups = ["networkmanager" "wheel"];
-    initialPassword = "claw"; # CHANGE THIS ONCE YOU LOG IN!
+    initialPassword = "clawe"; # CHANGE THIS ONCE YOU LOG IN!
     linger = true;
   };
 }

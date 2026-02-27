@@ -46,7 +46,7 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.extraSpecialArgs = {inherit nix-openclaw;};
-  home-manager.users.claw = import ./home/default.nix;
+  home-manager.users.clawe = import ./home/default.nix;
 
   system.stateVersion = "24.11";
 }

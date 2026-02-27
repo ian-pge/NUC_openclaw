@@ -44,8 +44,8 @@ Set root password when prompted, then `reboot` (remove USB first).
 ### 3. First login
 
 ```
-Username: claw
-Password: claw
+Username: clawe
+Password: clawe
 ```
 
 Change password immediately: `passwd`
@@ -74,7 +74,7 @@ Send a Telegram message to your bot — it should respond!
 From your laptop/phone, edit any file in this repo on GitHub. Then SSH into the NUC:
 
 ```bash
-ssh claw@<NUC_IP>
+ssh clawe@<NUC_IP>
 cd /path/to/NUC_openclaw
 bash scripts/deploy.sh
 ```
@@ -132,7 +132,7 @@ Send these in your Telegram chat with the bot:
 
 ### Give sudo access to OpenClaw
 
-It is recommended to give the `claw` user passwordless sudo so OpenClaw can run `nixos-rebuild` and other system commands autonomously. Add this to `users.nix` or configure it after install.
+It is recommended to give the `clawe` user passwordless sudo so OpenClaw can run `nixos-rebuild` and other system commands autonomously. Add this to `users.nix` or configure it after install.
 
 ### Do not store personal data on this machine
 
