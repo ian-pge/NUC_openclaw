@@ -148,3 +148,24 @@ After the initial setup, you should split things into two separate repositories:
 Create a **new GitHub profile** dedicated to your OpenClaw instance and push both repos there. Point OpenClaw at the agent config repo — that becomes the repo OpenClaw reads from and commits to going forward.
 
 This repo is only for the initial NUC setup and system-level NixOS changes. Day-to-day OpenClaw configuration should live in the dedicated agent repo.
+
+---
+
+## Prompt to Send OpenClaw for Repo Setup
+
+Once OpenClaw is running, send it this message to have it set everything up:
+
+```
+I need you to set up the GitHub repos for this machine. Here's what to do:
+
+1. Create a new GitHub account dedicated to this OpenClaw instance (or use the one I give you).
+2. Create two separate repos on that account:
+   - One for the NixOS system configuration (flake.nix, configuration.nix, hardware.nix, networking.nix, users.nix, disko.nix, etc.)
+   - One for your OpenClaw agent configuration (documents/, plugins, and any agent-specific config)
+3. Push the current NixOS config from this machine to the NixOS repo.
+4. Move the documents/ folder and any agent-specific files into the OpenClaw agent repo and push it.
+5. Configure yourself to use the agent repo as your working repo going forward — that's where you'll read config from and commit changes to.
+6. The NixOS repo should only be touched for system-level changes (packages, services, hardware config).
+
+The current config lives in ~/NUC_openclaw. Let me know if you need GitHub credentials or a token to proceed.
+```
