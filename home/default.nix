@@ -42,6 +42,7 @@
       # -- Telegram --
       # After first deploy, authenticate with: openclaw channels login
       channels.telegram = {
+        enable = true;
         dmPolicy = "pairing";
       };
 
