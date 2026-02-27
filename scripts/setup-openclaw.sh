@@ -47,7 +47,7 @@ else
 fi
 
 # Save Telegram credentials (stored in state dir, not the JSON)
-TELEGRAM_STATE="$HOME/.openclaw/channels/telegram"
+TELEGRAM_STATE="$HOME/.openclaw/telegram"
 if [ -d "$TELEGRAM_STATE" ]; then
     cp -a "$TELEGRAM_STATE" "$SECRETS_DIR/telegram-state"
     chmod -R 600 "$SECRETS_DIR/telegram-state"
