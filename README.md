@@ -50,10 +50,18 @@ Password: clawe
 
 Change password immediately: `passwd`
 
-### 4. Set up OpenClaw (one time)
+### 4. Clone the config repo
+
+The install process doesn't keep the source files on disk. Clone them into your home folder so OpenClaw can use it for your personal nixos configuration:
 
 ```bash
-cd /path/to/NUC_openclaw
+git clone https://github.com/ian-pge/NUC_openclaw.git ~/NUC_openclaw
+```
+
+### 5. Set up OpenClaw (one time)
+
+```bash
+cd ~/NUC_openclaw
 bash scripts/setup-openclaw.sh
 ```
 
@@ -61,7 +69,7 @@ This walks you through:
 - **ChatGPT OAuth** — links your ChatGPT subscription as the model provider
 - **Telegram pairing** — authenticate to connect Telegram
 
-### 5. Test it
+### 6. Test it
 
 Send a Telegram message to your bot — it should respond!
 
