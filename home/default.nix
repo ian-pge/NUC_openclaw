@@ -95,6 +95,9 @@
   programs.fish = {
     enable = true;
     interactiveShellInit = ''
+      if not test -e "/usr/share/terminfo/x/xterm-ghostty" -o -e "$HOME/.terminfo/x/xterm-ghostty"
+        set -gx TERM xterm-256color
+      end
       set fish_greeting
       functions -q prompt_newline; and prompt_newline >/dev/null
       fish_vi_key_bindings
