@@ -38,6 +38,8 @@
           lib,
           ...
         }: {
+          programs.nix-ld.enable = true;
+
           nixpkgs.overlays = [nix-openclaw.overlays.default];
 
           # --- Hardware & Boot ---
@@ -81,7 +83,6 @@
             pnpm # Required by OpenClaw
             jq # Used by OpenClaw skills
             ffmpeg # Media processing for OpenClaw
-            nodejs_24
           ];
 
           # --- Home Manager ---
