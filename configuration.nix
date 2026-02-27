@@ -60,7 +60,7 @@
   # --- Home Manager ---
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.backupFileExtension = "hm-backup";
+  # home-manager.backupFileExtension = "hm-backup";
   home-manager.extraSpecialArgs = {inherit nix-openclaw catppuccin;};
   home-manager.users.clawe = import ./home/default.nix;
 
