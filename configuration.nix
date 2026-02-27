@@ -28,7 +28,7 @@
   };
 
   # --- Session / Logind ---
-  services.logind.killUserProcesses = false;
+  services.logind.settings.Login.KillUserProcesses = false;
 
   # --- System Packages ---
   environment.systemPackages = with pkgs; [

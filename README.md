@@ -1,11 +1,15 @@
-# 🖥️ OpenClaw NixOS NUC
+# OpenClaw NixOS NUC
 
-NixOS flake for an Intel NUC running [OpenClaw](https://github.com/openclaw/openclaw) — a personal AI assistant accessible via WhatsApp, powered by OpenAI Codex (ChatGPT OAuth).
+NixOS flake for an Intel NUC running [OpenClaw](https://github.com/openclaw/openclaw) — a personal AI assistant accessible via Telegram, powered by OpenAI Codex (ChatGPT OAuth).
 
 ## Repo Structure
 
 ```
-├── flake.nix              # NixOS flake (system + home-manager + openclaw)
+├── flake.nix              # Flake inputs + module wiring
+├── configuration.nix      # Main system config (packages, nix settings, home-manager)
+├── hardware.nix           # Boot & hardware
+├── networking.nix         # Network & SSH
+├── users.nix              # User accounts
 ├── disko.nix              # Disk partitioning
 ├── home/
 │   └── default.nix        # Home Manager config (OpenClaw lives here)
@@ -14,13 +18,13 @@ NixOS flake for an Intel NUC running [OpenClaw](https://github.com/openclaw/open
 │   ├── SOUL.md            # Core personality
 │   └── TOOLS.md           # Tool usage instructions
 └── scripts/
-    ├── setup-openclaw.sh  # One-time interactive setup (OAuth + WhatsApp QR)
+    ├── setup-openclaw.sh  # One-time interactive setup (OAuth + Telegram)
     └── deploy.sh          # Pull from GitHub + rebuild
 ```
 
 ---
 
-## 📦 Fresh Install (from scratch)
+## Fresh Install (from scratch)
 
 ### 1. Boot NixOS installer USB on the NUC
 
@@ -54,18 +58,18 @@ bash scripts/setup-openclaw.sh
 ```
 
 This walks you through:
-- **ChatGPT OAuth** — links your $20/mo ChatGPT subscription as the model provider
-- **WhatsApp QR pairing** — scan with your phone to connect WhatsApp
+- **ChatGPT OAuth** — links your ChatGPT subscription as the model provider
+- **Telegram pairing** — authenticate to connect Telegram
 
 ### 5. Test it
 
-Send a WhatsApp message to yourself — your bot should respond!
+Send a Telegram message to your bot — it should respond!
 
 ---
 
-## 🔄 Day-to-Day Workflow
+## Day-to-Day Workflow
 
-**Edit on GitHub → pull on NUC → rebuild.**
+**Edit on GitHub -> pull on NUC -> rebuild.**
 
 From your laptop/phone, edit any file in this repo on GitHub. Then SSH into the NUC:
 
@@ -84,7 +88,7 @@ sudo nixos-rebuild switch --flake .#nuc
 
 ---
 
-## 🛠️ Useful Commands
+## Useful Commands
 
 ```bash
 # Service status
@@ -96,29 +100,51 @@ journalctl --user -u openclaw-gateway -f
 # Health check
 openclaw doctor
 
-# Re-pair WhatsApp (if session expires)
+# Re-authenticate Telegram (if session expires)
 openclaw channels login
 
 # Restart gateway
 systemctl --user restart openclaw-gateway
 
 # Rollback to previous config
-# (list generations, then switch)
 sudo nixos-rebuild switch --rollback
 ```
 
-### WhatsApp slash commands
+### Telegram slash commands
 
-Send these in your WhatsApp chat with the bot:
+Send these in your Telegram chat with the bot:
 
 - `/status` — session info, model, token usage
 - `/model openai/gpt-5.2` — switch model
 
 ---
 
-## 🔐 Security Notes
+## Security Notes
 
 - Secrets (OAuth tokens, session data) live in `~/.openclaw/` on the NUC — never in this repo
 - `.gitignore` excludes secrets and runtime state
 - SSH is password-enabled by default — consider switching to key-only auth
 - For production secrets, look into [agenix](https://github.com/ryantm/agenix) or [sops-nix](https://github.com/Mic92/sops-nix)
+
+---
+
+## Important: Post-Install Recommendations
+
+### Give sudo access to OpenClaw
+
+It is recommended to give the `claw` user passwordless sudo so OpenClaw can run `nixos-rebuild` and other system commands autonomously. Add this to `users.nix` or configure it after install.
+
+### Do not store personal data on this machine
+
+This NUC is dedicated to running OpenClaw. Do not store personal files, credentials, or sensitive data on it beyond what OpenClaw needs to operate.
+
+### Separate NixOS and OpenClaw configs into two repos
+
+After the initial setup, you should split things into two separate repositories:
+
+1. **NixOS system config** — this repo (`flake.nix`, `configuration.nix`, `hardware.nix`, etc.)
+2. **OpenClaw agent config** — a new repo containing `documents/`, plugins, and any agent-specific configuration
+
+Create a **new GitHub profile** dedicated to your OpenClaw instance and push both repos there. Point OpenClaw at the agent config repo — that becomes the repo OpenClaw reads from and commits to going forward.
+
+This repo is only for the initial NUC setup and system-level NixOS changes. Day-to-day OpenClaw configuration should live in the dedicated agent repo.

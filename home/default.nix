@@ -1,4 +1,4 @@
-# Home Manager config for user "claw" — OpenClaw with WhatsApp + Codex
+# Home Manager config for user "claw" — OpenClaw with Telegram + Codex
 {
   config,
   pkgs,
@@ -25,12 +25,10 @@
     documents = ../documents;
 
     config = {
-      # -- WhatsApp --
-      # After first deploy, pair your phone with: openclaw channels login
-      channels.whatsapp = {
-        dmPolicy = "pairing"; # Approve each new chat partner
-        # After pairing, optionally restrict:
-        # allowFrom = [ "whatsapp:336XXXXXXXX@s.whatsapp.net" ];
+      # -- Telegram --
+      # After first deploy, authenticate with: openclaw channels login
+      channels.telegram = {
+        dmPolicy = "pairing";
       };
 
       # -- Model: OpenAI Codex via ChatGPT OAuth --
