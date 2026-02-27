@@ -52,7 +52,6 @@
 
     bundledPlugins = {
       summarize.enable = true; # optional but useful
-      peekaboo.enable = true; # optional (screenshots)
       # add more later if you want
     };
 
