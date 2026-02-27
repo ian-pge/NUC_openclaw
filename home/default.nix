@@ -168,11 +168,11 @@
         style = "fg:sky";
         format = "[$symbol]($style)";
         symbols = {
-          NixOS = "";
-          Ubuntu = "";
-          Arch = "";
-          Fedora = "";
-          Debian = "";
+          NixOS = "";
+          Ubuntu = "";
+          Arch = "";
+          Fedora = "";
+          Debian = "";
         };
       };
 
