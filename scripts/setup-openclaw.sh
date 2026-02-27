@@ -46,11 +46,18 @@ else
     echo "⚠ Could not read gateway token"
 fi
 
-# Save Telegram bot token
-read -p "Paste your bot token from @BotFather: " BOT_TOKEN
-if [ -n "$BOT_TOKEN" ]; then
-    echo "TELEGRAM_BOT_TOKEN=$BOT_TOKEN" >> "$SECRETS_DIR/env"
+# Save Telegram bot token (extract from config after onboard)
+TG_TOKEN=$(openclaw config get channels.telegram.botToken 2>/dev/null || true)
+if [ -n "$TG_TOKEN" ]; then
+    echo "TELEGRAM_BOT_TOKEN=$TG_TOKEN" >> "$SECRETS_DIR/env"
     echo "✅ Telegram bot token saved"
+else
+    # Fallback: ask manually if onboard didn't set it
+    read -p "Paste your bot token from @BotFather: " BOT_TOKEN
+    if [ -n "$BOT_TOKEN" ]; then
+        echo "TELEGRAM_BOT_TOKEN=$BOT_TOKEN" >> "$SECRETS_DIR/env"
+        echo "✅ Telegram bot token saved"
+    fi
 fi
 
 # Save OpenAI/model credentials
