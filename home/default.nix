@@ -43,14 +43,13 @@
       gateway.mode = "local";
 
       # -- Telegram --
-      # After first deploy, authenticate with: openclaw channels login
       channels.telegram = {
         enabled = true;
-        dmPolicy = "pairing";
+        dmPolicy = "allowlist";
+        allowFrom = ["6996439087"];
       };
 
       # -- Model: OpenAI Codex via ChatGPT OAuth --
-      # After first deploy, authenticate with: openclaw onboard
       # Choose OpenAI → ChatGPT (OAuth) when prompted
       agents.defaults = {
         model = {

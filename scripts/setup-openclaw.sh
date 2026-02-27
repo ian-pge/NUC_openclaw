@@ -46,15 +46,11 @@ else
     echo "⚠ Could not read gateway token"
 fi
 
-# Save Telegram credentials (stored in state dir, not the JSON)
-TELEGRAM_STATE="$HOME/.openclaw/telegram"
-if [ -d "$TELEGRAM_STATE" ]; then
-    cp -a "$TELEGRAM_STATE" "$SECRETS_DIR/telegram-state"
-    chmod -R 600 "$SECRETS_DIR/telegram-state"
-    chmod 700 "$SECRETS_DIR/telegram-state"
-    echo "✅ Telegram state saved"
-else
-    echo "⚠ No Telegram state directory found"
+# Save Telegram bot token
+read -p "Paste your bot token from @BotFather: " BOT_TOKEN
+if [ -n "$BOT_TOKEN" ]; then
+    echo "TELEGRAM_BOT_TOKEN=$BOT_TOKEN" >> "$SECRETS_DIR/env"
+    echo "✅ Telegram bot token saved"
 fi
 
 # Save OpenAI/model credentials
