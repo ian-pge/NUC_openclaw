@@ -1,114 +1,124 @@
-# 🖥️ OpenClaw NixOS NUC Deployment
+# 🖥️ OpenClaw NixOS NUC
 
-This guide walks you through installing OpenClaw on an Intel NUC using NixOS, flakes, and Disko.
+NixOS flake for an Intel NUC running [OpenClaw](https://github.com/openclaw/openclaw) — a personal AI assistant accessible via WhatsApp, powered by OpenAI Codex (ChatGPT OAuth).
+
+## Repo Structure
+
+```
+├── flake.nix              # NixOS flake (system + home-manager + openclaw)
+├── disko.nix              # Disk partitioning
+├── home/
+│   └── default.nix        # Home Manager config (OpenClaw lives here)
+├── documents/
+│   ├── AGENTS.md          # Agent behavior & boundaries
+│   ├── SOUL.md            # Core personality
+│   └── TOOLS.md           # Tool usage instructions
+└── scripts/
+    ├── setup-openclaw.sh  # One-time interactive setup (OAuth + WhatsApp QR)
+    └── deploy.sh          # Pull from GitHub + rebuild
+```
 
 ---
 
-## 📦 1. Installation
+## 📦 Fresh Install (from scratch)
 
-### Step 1 — Boot the NixOS Installer
+### 1. Boot NixOS installer USB on the NUC
 
-1. Flash the latest NixOS ISO to a USB drive.
-2. Insert the USB into your Intel NUC.
-3. Boot from the USB device.
-
----
-
-### Step 2 — Clone the Repository
-
-Open a terminal in the NixOS live environment and run:
+### 2. Clone and install
 
 ```bash
 nix-shell -p git
 git clone https://github.com/ian-pge/NUC_openclaw.git
 cd NUC_openclaw
-```
 
----
-
-### Step 3 — Partition & Install (Disko + Flakes)
-
-Run:
-
-```bash
 sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko disko.nix && \
 sudo nixos-install --flake .#nuc
 ```
 
-This will:
-- Partition and format the disk using Disko
-- Install NixOS using the provided flake configuration
+Set root password when prompted, then `reboot` (remove USB first).
 
-When prompted:
-- Set your **root password**
-- Type:
+### 3. First login
 
-```bash
-reboot
+```
+Username: claw
+Password: claw
 ```
 
-⚠️ Important: Remove the USB drive before rebooting.
+Change password immediately: `passwd`
+
+### 4. Set up OpenClaw (one time)
+
+```bash
+cd /path/to/NUC_openclaw
+bash scripts/setup-openclaw.sh
+```
+
+This walks you through:
+- **ChatGPT OAuth** — links your $20/mo ChatGPT subscription as the model provider
+- **WhatsApp QR pairing** — scan with your phone to connect WhatsApp
+
+### 5. Test it
+
+Send a WhatsApp message to yourself — your bot should respond!
 
 ---
 
-## 🔐 2. First Login & Security
+## 🔄 Day-to-Day Workflow
 
-After reboot, log in with the default credentials:
+**Edit on GitHub → pull on NUC → rebuild.**
 
-Username: claw  
-Password: claw  
-
-Immediately change the password:
+From your laptop/phone, edit any file in this repo on GitHub. Then SSH into the NUC:
 
 ```bash
-passwd
+ssh claw@<NUC_IP>
+cd /path/to/NUC_openclaw
+bash scripts/deploy.sh
+```
+
+Or manually:
+
+```bash
+git pull
+sudo nixos-rebuild switch --flake .#nuc
 ```
 
 ---
 
-## 🌐 3. Remote Access (SSH)
-
-Managing the NUC remotely makes it easier to copy and paste OpenClaw commands.
-
-### Step 1 — Find the NUC IP Address
-
-On the NUC:
+## 🛠️ Useful Commands
 
 ```bash
-ip a
+# Service status
+systemctl --user status openclaw-gateway
+
+# Live logs
+journalctl --user -u openclaw-gateway -f
+
+# Health check
+openclaw doctor
+
+# Re-pair WhatsApp (if session expires)
+openclaw channels login
+
+# Restart gateway
+systemctl --user restart openclaw-gateway
+
+# Rollback to previous config
+# (list generations, then switch)
+sudo nixos-rebuild switch --rollback
 ```
 
-Look for an address like:
+### WhatsApp slash commands
 
-192.168.x.x
+Send these in your WhatsApp chat with the bot:
+
+- `/status` — session info, model, token usage
+- `/model openai/gpt-5.2` — switch model
 
 ---
 
-### Step 2 — Connect from Your Main Computer
+## 🔐 Security Notes
 
-On your main machine:
-
-```bash
-ssh claw@<NUC_IP_ADDRESS>
-```
-
-Example:
-
-```bash
-ssh claw@192.168.1.42
-```
-
-If prompted to trust the host, type:
-
-yes
-
----
-
-## ✅ Setup Complete
-
-Your OpenClaw NUC system is now:
-- Installed with NixOS
-- Secured with a new password
-- Accessible remotely via SSH
-
-You’re ready to deploy and manage OpenClaw.
+- Secrets (OAuth tokens, session data) live in `~/.openclaw/` on the NUC — never in this repo
+- `.gitignore` excludes secrets and runtime state
+- SSH is password-enabled by default — consider switching to key-only auth
+- For production secrets, look into [agenix](https://github.com/ryantm/agenix) or [sops-nix](https://github.com/Mic92/sops-nix)

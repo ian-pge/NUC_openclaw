@@ -2,26 +2,34 @@
   description = "NixOS Flake for OpenClaw NUC";
 
   inputs = {
-    # Using unstable to match your 25.11 installation ISO
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    
-    # The Disko tool for automated partitioning
+
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Home Manager (manages user-level config including OpenClaw)
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Official OpenClaw Nix module
+    nix-openclaw.url = "github:openclaw/nix-openclaw";
   };
 
-  outputs = { self, nixpkgs, disko, ... }: {
+  outputs = { self, nixpkgs, disko, home-manager, nix-openclaw, ... }: {
     nixosConfigurations.nuc = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         disko.nixosModules.disko
         ./disko.nix
+
+        # Home Manager as a NixOS module
+        home-manager.nixosModules.home-manager
+
         ({ config, pkgs, lib, ... }: {
-          
+
           # --- Hardware & Boot ---
           boot.loader.systemd-boot.enable = true;
           boot.loader.efi.canTouchEfiVariables = true;
-          # Standard kernel modules to ensure the NUC can read its drives and USBs
           boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "nvme" "usbhid" "usb_storage" "sd_mod" ];
           hardware.enableRedistributableFirmware = true;
 
@@ -32,7 +40,7 @@
           # --- SSH (Remote Access) ---
           services.openssh = {
             enable = true;
-            settings.PasswordAuthentication = true; # Allows you to log in with a password initially
+            settings.PasswordAuthentication = true;
           };
 
           # --- Users ---
@@ -41,21 +49,34 @@
             description = "OpenClaw Admin";
             extraGroups = [ "networkmanager" "wheel" ];
             initialPassword = "claw"; # CHANGE THIS ONCE YOU LOG IN!
+            linger = true; # Keep user services running after logout (needed for OpenClaw)
           };
 
           # --- System Settings ---
           nixpkgs.config.allowUnfree = true;
           nix.settings.experimental-features = [ "nix-command" "flakes" ];
-          
-          # Essential system packages
+
+          # Keep user services alive after SSH disconnect
+          services.logind.killUserProcesses = false;
+
           environment.systemPackages = with pkgs; [
             git
             curl
             nano
             htop
+            nodejs_22  # Required by OpenClaw
+            pnpm       # Required by OpenClaw
+            jq         # Used by OpenClaw skills
+            ffmpeg     # Media processing for OpenClaw
           ];
 
-          system.stateVersion = "24.11"; 
+          # --- Home Manager ---
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.extraSpecialArgs = { inherit nix-openclaw; };
+          home-manager.users.claw = import ./home/default.nix;
+
+          system.stateVersion = "24.11";
         })
       ];
     };
