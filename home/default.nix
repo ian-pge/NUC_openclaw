@@ -61,6 +61,11 @@
     # ];
   };
 
+  # Ensure the gateway service starts on boot (nix-openclaw doesn't set WantedBy)
+  systemd.user.services.openclaw-gateway = {
+    Install.WantedBy = ["default.target"];
+  };
+
   # ---------------------------------------------------------------------------
   # Catppuccin theme
   # ---------------------------------------------------------------------------
