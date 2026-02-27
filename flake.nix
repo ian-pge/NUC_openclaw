@@ -11,6 +11,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-openclaw.url = "github:openclaw/nix-openclaw";
+
+    catppuccin.url = "github:catppuccin/nix";
   };
 
   outputs = {
@@ -19,11 +21,12 @@
     disko,
     home-manager,
     nix-openclaw,
+    catppuccin,
     ...
   }: {
     nixosConfigurations.nuc = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = {inherit nix-openclaw;};
+      specialArgs = {inherit nix-openclaw catppuccin;};
       modules = [
         disko.nixosModules.disko
         ./disko.nix

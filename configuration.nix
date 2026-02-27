@@ -3,6 +3,7 @@
   pkgs,
   lib,
   nix-openclaw,
+  catppuccin,
   ...
 }: {
   imports = [
@@ -59,7 +60,7 @@
   # --- Home Manager ---
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.extraSpecialArgs = {inherit nix-openclaw;};
+  home-manager.extraSpecialArgs = {inherit nix-openclaw catppuccin;};
   home-manager.users.clawe = import ./home/default.nix;
 
   system.stateVersion = "24.11";

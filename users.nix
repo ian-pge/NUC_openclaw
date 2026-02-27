@@ -1,6 +1,9 @@
-{...}: {
+{pkgs, ...}: {
+  programs.fish.enable = true;
+
   users.users.clawe = {
     isNormalUser = true;
+    shell = pkgs.fish;
     description = "OpenClaw Admin";
     extraGroups = ["networkmanager" "wheel"];
     initialPassword = "clawe"; # CHANGE THIS ONCE YOU LOG IN!
