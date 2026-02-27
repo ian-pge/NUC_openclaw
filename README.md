@@ -67,27 +67,6 @@ Send a Telegram message to your bot — it should respond!
 
 ---
 
-## Day-to-Day Workflow
-
-**Edit on GitHub -> pull on NUC -> rebuild.**
-
-From your laptop/phone, edit any file in this repo on GitHub. Then SSH into the NUC:
-
-```bash
-ssh clawe@<NUC_IP>
-cd /path/to/NUC_openclaw
-bash scripts/deploy.sh
-```
-
-Or manually:
-
-```bash
-git pull
-sudo nixos-rebuild switch --flake .#nuc
-```
-
----
-
 ## Useful Commands
 
 ```bash
