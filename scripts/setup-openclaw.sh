@@ -18,32 +18,21 @@ if [ ! -d "$SECRETS_DIR" ]; then
     sudo chmod 700 "$SECRETS_DIR"
 fi
 
-echo "━━━ Step 1: Model Provider (ChatGPT OAuth) ━━━"
+echo "━━━ Step 1: Onboarding (Model + Channels) ━━━"
 echo ""
-echo "When prompted, choose:"
-echo "  Provider → OpenAI"
-echo "  Auth     → ChatGPT (OAuth)"
+echo "This will walk you through:"
+echo "  • Model provider (choose OpenAI → ChatGPT OAuth)"
+echo "  • Telegram pairing"
 echo ""
-echo "You'll get a URL to open in a browser."
-echo "If NUC is headless, check which port openclaw is listening on:"
-echo "  ss -tlnp"
-echo "Then from your laptop, forward that port:"
+echo "If NUC is headless and you get a URL to open:"
 echo "  ssh -L <PORT>:localhost:<PORT> clawe@<NUC_IP>"
-echo "Open the URL on your laptop and paste the redirect back."
+echo "  Then open the URL on your laptop."
 echo ""
 read -p "Press Enter to start onboarding..."
 openclaw onboard || echo "⚠ Onboarding exited. Re-run with: openclaw onboard"
 
 echo ""
-echo "━━━ Step 2: Telegram Pairing ━━━"
-echo ""
-echo "Follow the prompts to authenticate with Telegram."
-echo ""
-read -p "Press Enter to start Telegram pairing..."
-openclaw channels login || echo "⚠ Pairing exited. Re-run with: openclaw channels login"
-
-echo ""
-echo "━━━ Step 3: Persist Credentials ━━━"
+echo "━━━ Step 2: Persist Credentials ━━━"
 echo ""
 echo "Saving tokens so they survive reboots..."
 
@@ -68,18 +57,19 @@ else
     echo "⚠ No Telegram state directory found"
 fi
 
-# Save OpenAI/model credentials from the config before home-manager overwrites it
+# Save OpenAI/model credentials
 OPENAI_KEY=$(openclaw config get agents.defaults.model.credentials.apiKey 2>/dev/null || true)
 if [ -n "$OPENAI_KEY" ]; then
     echo "OPENAI_API_KEY=$OPENAI_KEY" >> "$SECRETS_DIR/env"
     echo "✅ OpenAI credentials saved"
 fi
 
-# Backup the entire config as a reference
+# Backup the entire config as reference
 cp "$HOME/.openclaw/openclaw.json" "$SECRETS_DIR/openclaw.json.reference" 2>/dev/null || true
 echo "✅ Config snapshot saved to $SECRETS_DIR/openclaw.json.reference"
+
 echo ""
-echo "━━━ Step 4: Verify ━━━"
+echo "━━━ Step 3: Verify ━━━"
 echo ""
 
 if systemctl --user is-active --quiet openclaw-gateway 2>/dev/null; then
