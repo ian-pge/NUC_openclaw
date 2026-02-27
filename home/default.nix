@@ -1,9 +1,12 @@
 # Home Manager config for user "claw" — OpenClaw with WhatsApp + Codex
-{ config, pkgs, nix-openclaw, ... }:
-
 {
+  config,
+  pkgs,
+  nix-openclaw,
+  ...
+}: {
   imports = [
-    nix-openclaw.homeManagerModules.default
+    nix-openclaw.homeManagerModules.openclaw
   ];
 
   home.username = "claw";
@@ -39,7 +42,7 @@
           # fallbacks = [ "openai/gpt-5.2" ];
         };
         models = {
-          "openai/codex" = { alias = "Codex"; };
+          "openai/codex" = {alias = "Codex";};
           # Uncomment to add more models to the /model allowlist:
           # "openai/gpt-5.2" = { alias = "GPT"; };
           # "anthropic/claude-sonnet-4-5" = { alias = "Sonnet"; };
@@ -49,8 +52,8 @@
 
     # -- Built-in plugins --
     firstParty = {
-      summarize.enable = true;  # Summarize URLs, PDFs, videos
-      oracle.enable = true;     # Web search
+      summarize.enable = true; # Summarize URLs, PDFs, videos
+      oracle.enable = true; # Web search
     };
 
     # -- Community plugins --
