@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 # Run ONCE on a new machine before the first nixos-rebuild / home-manager switch.
 # Writes secret files to ~/.secrets/ — read at service startup, never in git.
@@ -80,6 +79,10 @@ printf '%s' "$tg_bot_token" > "$SECRETS_DIR/telegram-bot-token"
 chmod 600 "$SECRETS_DIR/telegram-bot-token"
 echo "  Saved -> $SECRETS_DIR/telegram-bot-token"
 
+# --- Restart Service -----------------------------------------------------------
+echo "  Restarting the OpenClaw gateway service..."
+systemctl --user restart openclaw-gateway || echo "  Warning: Failed to restart openclaw-gateway. Is it enabled?"
+
 # --- Done --------------------------------------------------------------------
 echo ""
 echo "==========================================="
@@ -89,7 +92,6 @@ echo "  Next steps:"
 echo "    cd $REPO_DIR"
 echo "    sudo nixos-rebuild switch --flake .#nuc"
 echo ""
-echo "  After rebuild:"
-echo "    systemctl --user status openclaw-gateway"
+echo "  To view logs:"
 echo "    journalctl --user -u openclaw-gateway -f"
 echo "==========================================="
