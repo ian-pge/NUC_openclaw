@@ -114,6 +114,11 @@ in {
       fish_vi_key_bindings
       bind yy fish_clipboard_copy
       bind -M visual y fish_clipboard_copy
+
+      # Auto-auth the OpenClaw CLI by injecting the background service's token
+      if test -f "$HOME/.secrets/openclaw-gateway-env"
+        export (grep '^OPENCLAW_GATEWAY_TOKEN=' "$HOME/.secrets/openclaw-gateway-env")
+      end
     '';
     functions = {
       starship_transient_prompt_func.body = "starship module time";
