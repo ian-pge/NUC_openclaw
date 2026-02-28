@@ -1,102 +1,95 @@
+
 #!/usr/bin/env bash
-# Run ONCE on the NUC after first nixos-rebuild to handle interactive steps.
+# Run ONCE on a new machine before the first nixos-rebuild / home-manager switch.
+# Writes secret files to ~/.secrets/ — read at service startup, never in git.
 set -euo pipefail
 
-SECRETS_DIR="/var/lib/secrets/openclaw"
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+SECRETS_DIR="$HOME/.secrets"
 
 echo ""
-echo "═══════════════════════════════════════════════"
-echo "  OpenClaw Setup — One-Time Interactive Steps"
-echo "═══════════════════════════════════════════════"
+echo "==========================================="
+echo "  OpenClaw First-Time Setup"
+echo "==========================================="
 echo ""
 
-# --- Create secrets directory ---
-if [ ! -d "$SECRETS_DIR" ]; then
-    echo "Creating secrets directory at $SECRETS_DIR ..."
-    sudo mkdir -p "$SECRETS_DIR"
-    sudo chown "$(whoami):users" "$SECRETS_DIR"
-    sudo chmod 700 "$SECRETS_DIR"
+# --- Create secrets directory ------------------------------------------------
+mkdir -p "$SECRETS_DIR"
+chmod 700 "$SECRETS_DIR"
+
+# --- 1. Gateway Token -------------------------------------------------------
+echo "--- Gateway Auth Token ---"
+echo ""
+echo "  This secures communication with the OpenClaw gateway."
+echo "  Press Enter to auto-generate a random token (recommended)."
+echo ""
+
+printf "  Enter token (or Enter to generate): "
+read -r gw_token
+if [ -z "$gw_token" ]; then
+  gw_token=$(od -An -tx1 -N24 /dev/urandom | tr -d ' \n')
+  echo "  Generated: $gw_token"
 fi
 
-echo "━━━ Step 1: Onboarding (Model + Channels) ━━━"
+# --- 2. Telegram Bot Token ---------------------------------------------------
 echo ""
-echo "This will walk you through:"
-echo "  • Model provider (choose OpenAI → ChatGPT OAuth)"
-echo "  • Telegram pairing"
+echo "--- Telegram Bot Token ---"
 echo ""
-echo "If NUC is headless and you get a URL to open:"
-echo "  ssh -L <PORT>:localhost:<PORT> clawe@<NUC_IP>"
-echo "  Then open the URL on your laptop."
+echo "  Create a bot via @BotFather on Telegram and paste the token."
 echo ""
-read -p "Press Enter to start onboarding..."
-openclaw onboard || echo "⚠ Onboarding exited. Re-run with: openclaw onboard"
 
-echo ""
-echo "━━━ Step 2: Persist Credentials ━━━"
-echo ""
-echo "Saving tokens so they survive reboots..."
-
-# Save gateway token
-GW_TOKEN=$(openclaw config get gateway.auth.token 2>/dev/null || true)
-if [ -n "$GW_TOKEN" ]; then
-    echo "OPENCLAW_GATEWAY_TOKEN=$GW_TOKEN" > "$SECRETS_DIR/env"
-    chmod 600 "$SECRETS_DIR/env"
-    echo "✅ Gateway token saved"
-else
-    echo "⚠ Could not read gateway token"
+printf "  Bot token: "
+read -r tg_bot_token
+if [ -z "$tg_bot_token" ]; then
+  echo "  Error: bot token cannot be empty."
+  exit 1
 fi
 
-# Save Telegram bot token (extract from config after onboard)
-TG_TOKEN=$(openclaw config get channels.telegram.botToken 2>/dev/null || true)
-if [ -n "$TG_TOKEN" ]; then
-    echo "TELEGRAM_BOT_TOKEN=$TG_TOKEN" >> "$SECRETS_DIR/env"
-    echo "✅ Telegram bot token saved"
-else
-    # Fallback: ask manually if onboard didn't set it
-    read -p "Paste your bot token from @BotFather: " BOT_TOKEN
-    if [ -n "$BOT_TOKEN" ]; then
-        echo "TELEGRAM_BOT_TOKEN=$BOT_TOKEN" >> "$SECRETS_DIR/env"
-        echo "✅ Telegram bot token saved"
-    fi
+# --- 3. LLM Provider (optional API keys) ------------------------------------
+echo ""
+echo "--- LLM Provider ---"
+echo ""
+echo "  The default config uses OpenAI Codex via ChatGPT OAuth."
+echo "  After rebuild, the gateway will prompt you to log in via Telegram."
+echo "  No API key needed unless you want a different provider."
+echo ""
+
+printf "  Anthropic API key (or Enter to skip): "
+read -r anthropic_key
+if [ -n "$anthropic_key" ]; then
+  printf '%s' "$anthropic_key" > "$SECRETS_DIR/anthropic-api-key"
+  chmod 600 "$SECRETS_DIR/anthropic-api-key"
+  echo "  Saved -> $SECRETS_DIR/anthropic-api-key"
 fi
 
-# Save OpenAI/model credentials
-OPENAI_KEY=$(openclaw config get agents.defaults.model.credentials.apiKey 2>/dev/null || true)
-if [ -n "$OPENAI_KEY" ]; then
-    echo "OPENAI_API_KEY=$OPENAI_KEY" >> "$SECRETS_DIR/env"
-    echo "✅ OpenAI credentials saved"
+printf "  OpenAI API key (or Enter to skip): "
+read -r openai_key
+if [ -n "$openai_key" ]; then
+  printf '%s' "$openai_key" > "$SECRETS_DIR/openai-api-key"
+  chmod 600 "$SECRETS_DIR/openai-api-key"
+  echo "  Saved -> $SECRETS_DIR/openai-api-key"
 fi
 
-# Backup the entire config as reference
-cp "$HOME/.openclaw/openclaw.json" "$SECRETS_DIR/openclaw.json.reference" 2>/dev/null || true
-echo "✅ Config snapshot saved to $SECRETS_DIR/openclaw.json.reference"
+# --- Write secret files to ~/.secrets/ ----------------------------------------
+printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$gw_token" > "$SECRETS_DIR/openclaw-gateway-env"
+chmod 600 "$SECRETS_DIR/openclaw-gateway-env"
+echo ""
+echo "  Saved -> $SECRETS_DIR/openclaw-gateway-env"
 
-echo ""
-echo "━━━ Step 3: Verify ━━━"
-echo ""
+printf '%s' "$tg_bot_token" > "$SECRETS_DIR/telegram-bot-token"
+chmod 600 "$SECRETS_DIR/telegram-bot-token"
+echo "  Saved -> $SECRETS_DIR/telegram-bot-token"
 
-if systemctl --user is-active --quiet openclaw-gateway 2>/dev/null; then
-    echo "✅ openclaw-gateway is running!"
-else
-    echo "Starting openclaw-gateway..."
-    systemctl --user start openclaw-gateway 2>/dev/null || true
-    sleep 3
-    if systemctl --user is-active --quiet openclaw-gateway 2>/dev/null; then
-        echo "✅ Started!"
-    else
-        echo "❌ Failed. Check: journalctl --user -u openclaw-gateway -n 30"
-    fi
-fi
-
+# --- Done --------------------------------------------------------------------
 echo ""
-echo "═══════════════════════════════════════════════"
-echo "  Done! Send a Telegram message to test."
+echo "==========================================="
+echo "  Setup complete!"
 echo ""
-echo "  Credentials saved to: $SECRETS_DIR"
-echo "  These survive reboots and nixos-rebuild."
+echo "  Next steps:"
+echo "    cd $REPO_DIR"
+echo "    sudo nixos-rebuild switch --flake .#nuc"
 echo ""
-echo "  Useful commands:"
+echo "  After rebuild:"
 echo "    systemctl --user status openclaw-gateway"
 echo "    journalctl --user -u openclaw-gateway -f"
-echo "    openclaw doctor"
-echo "═══════════════════════════════════════════════"
+echo "==========================================="

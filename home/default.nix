@@ -1,11 +1,16 @@
 # Home Manager config for user "clawe" — OpenClaw with Telegram + Codex
+#
+# Before first build, run: bash scripts/setup-openclaw.sh
+# This writes secret files to ~/.secrets/.
 {
   config,
   pkgs,
   nix-openclaw,
   catppuccin,
   ...
-}: {
+}: let
+  secretsDir = "/home/clawe/.secrets";
+in {
   imports = [
     nix-openclaw.homeManagerModules.openclaw
     catppuccin.homeModules.catppuccin
@@ -22,11 +27,11 @@
     Unit = {
       After = ["network-online.target"];
     };
-    Service = {
-      EnvironmentFile = ["/var/lib/secrets/openclaw/env"];
-    };
     Install = {
       WantedBy = ["default.target"];
+    };
+    Service = {
+      EnvironmentFile = "${secretsDir}/openclaw-gateway-env";
     };
   };
 
@@ -40,24 +45,30 @@
     documents = ../documents;
 
     config = {
-      gateway.mode = "local";
+      gateway = {
+        mode = "local";
+      };
 
       # -- Telegram --
       channels.telegram = {
-        enabled = true;
-        dmPolicy = "allowlist";
-        allowFrom = ["6996439087"];
+        tokenFile = "${secretsDir}/telegram-bot-token";
+        allowFrom = [6996439087];
       };
 
-      # -- Model: OpenAI Codex via ChatGPT OAuth --
-      # Choose OpenAI → ChatGPT (OAuth) when prompted
+      # -- Auth: OpenAI Codex via ChatGPT OAuth --
+      auth.profiles."openai-codex:default" = {
+        provider = "openai-codex";
+        mode = "oauth";
+      };
+
+      # -- Model: OpenAI Codex --
       agents.defaults = {
         model = {
-          primary = "openai/codex";
+          primary = "openai-codex/gpt-5.3-codex";
           # fallbacks = [ "openai/gpt-5.2" ];
         };
         models = {
-          "openai/codex" = {alias = "Codex";};
+          "openai-codex/gpt-5.3-codex" = {alias = "Codex";};
           # Uncomment to add more models to the /model allowlist:
           # "openai/gpt-5.2" = { alias = "GPT"; };
           # "anthropic/claude-sonnet-4-5" = { alias = "Sonnet"; };
