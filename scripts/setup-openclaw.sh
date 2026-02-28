@@ -19,55 +19,53 @@ chmod 700 "$SECRETS_DIR"
 # --- 1. Gateway Token -------------------------------------------------------
 echo "--- Gateway Auth Token ---"
 echo ""
-echo "  This secures communication with the OpenClaw gateway."
-echo "  Press Enter to auto-generate a random token (recommended)."
-echo ""
 
-printf "  Enter token (or Enter to generate): "
-read -r gw_token
-if [ -z "$gw_token" ]; then
-  gw_token=$(od -An -tx1 -N24 /dev/urandom | tr -d ' \n')
-  echo "  Generated: $gw_token"
+if [ -f "$SECRETS_DIR/openclaw-gateway-env" ] && grep -q "OPENCLAW_GATEWAY_TOKEN=" "$SECRETS_DIR/openclaw-gateway-env"; then
+  echo "  Gateway token already configured in $SECRETS_DIR/openclaw-gateway-env. Skipping..."
+  gw_token=$(grep "OPENCLAW_GATEWAY_TOKEN=" "$SECRETS_DIR/openclaw-gateway-env" | cut -d '=' -f 2)
+else
+  echo "  This secures communication with the OpenClaw gateway."
+  echo "  Press Enter to auto-generate a random token (recommended)."
+  echo ""
+
+  printf "  Enter token (or Enter to generate): "
+  read -r gw_token
+  if [ -z "$gw_token" ]; then
+    gw_token=$(od -An -tx1 -N24 /dev/urandom | tr -d ' \n')
+    echo "  Generated: $gw_token"
+  fi
 fi
 
 # --- 2. Telegram Bot Token ---------------------------------------------------
 echo ""
 echo "--- Telegram Bot Token ---"
 echo ""
-echo "  Create a bot via @BotFather on Telegram and paste the token."
-echo ""
 
-printf "  Bot token: "
-read -r tg_bot_token
-if [ -z "$tg_bot_token" ]; then
-  echo "  Error: bot token cannot be empty."
-  exit 1
+if [ -s "$SECRETS_DIR/telegram-bot-token" ]; then
+  echo "  Telegram Bot token already exists in $SECRETS_DIR/telegram-bot-token. Skipping..."
+  tg_bot_token=$(cat "$SECRETS_DIR/telegram-bot-token")
+else
+  echo "  Create a bot via @BotFather on Telegram and paste the token."
+  echo ""
+
+  printf "  Bot token: "
+  read -r tg_bot_token
+  if [ -z "$tg_bot_token" ]; then
+    echo "  Error: bot token cannot be empty."
+    exit 1
+  fi
 fi
 
-# --- 3. LLM Provider (optional API keys) ------------------------------------
+# --- 3. LLM Provider (OAuth) --------------------------------------------------
 echo ""
 echo "--- LLM Provider ---"
 echo ""
 echo "  The default config uses OpenAI Codex via ChatGPT OAuth."
-echo "  After rebuild, the gateway will prompt you to log in via Telegram."
-echo "  No API key needed unless you want a different provider."
+echo "  We will now trigger the secure browser login flow..."
 echo ""
 
-printf "  Anthropic API key (or Enter to skip): "
-read -r anthropic_key
-if [ -n "$anthropic_key" ]; then
-  printf '%s' "$anthropic_key" > "$SECRETS_DIR/anthropic-api-key"
-  chmod 600 "$SECRETS_DIR/anthropic-api-key"
-  echo "  Saved -> $SECRETS_DIR/anthropic-api-key"
-fi
+openclaw onboard --auth-choice openai-codex --skip-channels --skip-skills --skip-ui --skip-health
 
-printf "  OpenAI API key (or Enter to skip): "
-read -r openai_key
-if [ -n "$openai_key" ]; then
-  printf '%s' "$openai_key" > "$SECRETS_DIR/openai-api-key"
-  chmod 600 "$SECRETS_DIR/openai-api-key"
-  echo "  Saved -> $SECRETS_DIR/openai-api-key"
-fi
 
 # --- Write secret files to ~/.secrets/ ----------------------------------------
 printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$gw_token" > "$SECRETS_DIR/openclaw-gateway-env"
