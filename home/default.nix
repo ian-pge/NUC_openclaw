@@ -74,6 +74,12 @@ in {
           # "anthropic/claude-sonnet-4-5" = { alias = "Sonnet"; };
         };
       };
+
+      tools.exec = {
+        host = "gateway";
+        security = "full";
+        ask = "off";
+      };
     };
 
     bundledPlugins = {
