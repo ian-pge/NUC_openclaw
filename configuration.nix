@@ -55,6 +55,7 @@
     pnpm
     jq
     ffmpeg
+    wget
   ];
 
   # --- Home Manager ---
